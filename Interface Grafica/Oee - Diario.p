@@ -44,9 +44,9 @@ DEFINE NEW GLOBAL SHARED TEMP-TABLE tt-parada NO-UNDO
     FIELD tempo AS DECIMAL.
 
 ASSIGN cont-temp-prod = 0.
-/*        data-ini = 06/15/20     */
-/*        data-fim = 06/30/20     */
-/*        centro = "4136003PE14". */
+/*        data-ini = DATE("07/01/2021") */
+/*        data-fim = DATE("07/01/2021") */
+/*        centro = "4120101SP09".       */
 
 EMPTY TEMP-TABLE tt-oee.
 
@@ -173,9 +173,8 @@ FOR EACH rep-oper-ctrab
       AND rep-oper-ctrab.dat-fim-report <= data-fim,
 
     FIRST split-operac WHERE split-operac.nr-ord-produ = rep-oper-ctrab.nr-ord-produ,
-    FIRST oper-ord WHERE oper-ord.nr-ord-produ = rep-oper-ctrab.nr-ord-produ NO-LOCK BREAK BY rep-oper-ctrab.dat-inic-report.
-    //FIRST operacao WHERE operacao.it-codigo = split-operac.it-codigo NO-LOCK BREAK BY rep-oper-ctrab.dat-inic-report.
-
+    FIRST rep-oper WHERE rep-oper.nr-ord-produ = split-operac.nr-ord-produ AND rep-oper.nr-reporte = rep-oper-ctrab.nr-reporte,
+    FIRST oper-ord WHERE oper-ord.nr-ord-produ = rep-oper.nr-ord-produ AND oper-ord.op-codigo = rep-oper.op-codigo  NO-LOCK BREAK BY rep-oper-ctrab.dat-inic-report.
 
     IF FIRST-OF(rep-oper-ctrab.dat-inic-report) THEN DO:
         ASSIGN data-atu = rep-oper-ctrab.dat-inic-report.
@@ -195,7 +194,6 @@ FOR EACH rep-oper-ctrab
         END.
     END.
 
-
     //VERIFICA SE O ITEM Ô COMPOSTO
     FIND FIRST CST_Item
          WHERE CST_Item.it-codigo = split-operac.it-codigo NO-ERROR.
@@ -205,7 +203,7 @@ FOR EACH rep-oper-ctrab
 
             //SE O ITEM  COMPOSTO FA€A ISSO:
             IF CST_Item.LOG_Composto = TRUE THEN DO:
-
+                
                   //MESSAGE "COMPOSTO" VIEW-AS ALERT-BOX.
                   ASSIGN cont-dias-mes = cont-dias-mes + 1
                          cont-temp-prod = cont-temp-prod + (rep-oper-ctrab.qtd-tempo-reporte / 2)
@@ -217,12 +215,13 @@ FOR EACH rep-oper-ctrab
             //SE N¶O  COMPOSTO FA€A ISSO:
             ELSE DO:
 
+                
                 //MESSAGE "NÇO COMPOSTO" VIEW-AS ALERT-BOX.
                 ASSIGN cont-dias-mes = cont-dias-mes + 1
-                cont-temp-prod = cont-temp-prod + rep-oper-ctrab.qtd-tempo-reporte
-                cont-pc-boas = cont-pc-boas + rep-oper-ctrab.qtd-operac-aprov
-                cont-pc-ruins = cont-pc-ruins + rep-oper-ctrab.qtd-operac-refgda
-                cont-prod-teorica = cont-prod-teorica + (ROUND((((oper-ord.nr-unidades / oper-ord.tempo-maquin) * 60) * rep-oper-ctrab.qtd-tempo-reporte),0)).
+                    cont-temp-prod = cont-temp-prod + rep-oper-ctrab.qtd-tempo-reporte
+                    cont-pc-boas = cont-pc-boas + rep-oper-ctrab.qtd-operac-aprov
+                    cont-pc-ruins = cont-pc-ruins + rep-oper-ctrab.qtd-operac-refgda
+                    cont-prod-teorica = cont-prod-teorica + (ROUND((((oper-ord.nr-unidades / oper-ord.tempo-maquin) * 60) * rep-oper-ctrab.qtd-tempo-reporte),0)).
 
             END.
 
@@ -238,16 +237,15 @@ FOR EACH rep-oper-ctrab
 /*                     "reporte: " + string(rep-oper-ctrab.qtd-tempo-reporte) SKIP                                                                                  */
 /*                     "PE€AS: " + STRING((ROUND((((oper-ord.nr-unidades / oper-ord.tempo-maquin) * 60) * rep-oper-ctrab.qtd-tempo-reporte),0))) VIEW-AS ALERT-BOX. */
          
-/*          IF NOT AVAIL CST_Item THEN DO:                                                                                                      */
-/*                                                                                                                                              */
-/*             MESSAGE "NÇO COMPOSTO" VIEW-AS ALERT-BOX.                                                                                        */
-/*             ASSIGN cont-dias-mes = cont-dias-mes + 1                                                                                         */
-/*                    cont-temp-prod = cont-temp-prod + rep-oper-ctrab.qtd-tempo-reporte                                                        */
-/*                    cont-pc-boas = cont-pc-boas + rep-oper-ctrab.qtd-operac-aprov                                                             */
-/*                    cont-pc-ruins = cont-pc-ruins + rep-oper-ctrab.qtd-operac-refgda                                                          */
-/*                    cont-prod-teorica = cont-prod-teorica + (ROUND((((operacao.nr-unidade / operacao.tempo-maquin) * 60) * tt-oee.turno),0)). */
-/*                                                                                                                                              */
-/*          END.                                                                                                                                */
+         IF NOT AVAIL CST_Item THEN DO:
+
+             ASSIGN cont-dias-mes = cont-dias-mes + 1
+                    cont-temp-prod = cont-temp-prod + rep-oper-ctrab.qtd-tempo-reporte
+                    cont-pc-boas = cont-pc-boas + rep-oper-ctrab.qtd-operac-aprov
+                    cont-pc-ruins = cont-pc-ruins + rep-oper-ctrab.qtd-operac-refgda
+                    cont-prod-teorica = cont-prod-teorica + (ROUND((((oper-ord.nr-unidades / oper-ord.tempo-maquin) * 60) * rep-oper-ctrab.qtd-tempo-reporte),0)).
+
+         END.
     
     IF LAST-OF(rep-oper-ctrab.dat-inic-report) THEN DO:
 
@@ -285,6 +283,6 @@ END.
 
 //FINAL BUSCA APONTAMENTOS***********************************************************
 
-/* FOR EACH tt-oee.                                                                                         */
-/*     DISP tt-oee.data tt-oee.oee-disp tt-oee.oee-perf tt-oee.oee-quali tt-oee.oee-percent WITH WIDTH 400. */
-/* END.                                                                                                     */
+/* FOR EACH tt-oee.                                                          */
+/*     DISP tt-oee.data tt-oee.prod-real tt-oee.prod-teorica WITH WIDTH 400. */
+/* END.                                                                      */

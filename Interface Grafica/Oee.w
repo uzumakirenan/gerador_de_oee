@@ -1,7 +1,5 @@
 &ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI
 &ANALYZE-RESUME
-/* Connected Databases 
-*/
 &Scoped-define WINDOW-NAME C-Win
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
 /*------------------------------------------------------------------------
@@ -182,7 +180,7 @@ DEFINE NEW GLOBAL SHARED TEMP-TABLE tt-parada-men NO-UNDO
     ~{&OPEN-QUERY-Paradas-mes}
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS BUTTON-6 Paradas edt-centro btn-plano-acao ~
+&Scoped-Define ENABLED-OBJECTS Paradas BUTTON-6 edt-centro btn-plano-acao ~
 APONTAMENTOS cb-modo edt-data-ini edt-data-fim res-disp res-oee bt-con-dir ~
 res-perf edt-ano res-quali bt-con-men bt-imprimir BUTTON-4 BUTTON-5 ~
 edt-pc-ruins edt-pc-boa edt-item RECT-16 RECT-17 RECT-18 RECT-19 RECT-20 ~
@@ -469,8 +467,8 @@ DEFINE BROWSE Paradas-mes
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     BUTTON-6 AT ROW 1.25 COL 115 WIDGET-ID 132
      Paradas AT ROW 14.25 COL 2 WIDGET-ID 300
+     BUTTON-6 AT ROW 1.25 COL 115 WIDGET-ID 132
      edt-centro AT ROW 1.38 COL 14.14 COLON-ALIGNED WIDGET-ID 128
      btn-plano-acao AT ROW 1.25 COL 151 WIDGET-ID 130 NO-TAB-STOP 
      APONTAMENTOS AT ROW 15.75 COL 93 WIDGET-ID 200
@@ -1344,7 +1342,7 @@ PROCEDURE enable_UI :
   DISPLAY edt-centro cb-modo edt-data-ini edt-data-fim edt-ano edt-pc-ruins 
           edt-pc-boa edt-item 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE BUTTON-6 Paradas edt-centro btn-plano-acao APONTAMENTOS cb-modo 
+  ENABLE Paradas BUTTON-6 edt-centro btn-plano-acao APONTAMENTOS cb-modo 
          edt-data-ini edt-data-fim res-disp res-oee bt-con-dir res-perf edt-ano 
          res-quali bt-con-men bt-imprimir BUTTON-4 BUTTON-5 edt-pc-ruins 
          edt-pc-boa edt-item RECT-16 RECT-17 RECT-18 RECT-19 RECT-20 RECT-23 
@@ -2123,6 +2121,7 @@ MESSAGE "Arquivo salvo em " + cFile + "\" + arquivo + extensao VIEW-AS ALERT-BOX
 
 ex:APPLICATION:DisplayAlerts = FALSE.
 
+//ex:VISIBLE = TRUE.
 ex:QUIT().
 
 RELEASE OBJECT ex NO-ERROR.
